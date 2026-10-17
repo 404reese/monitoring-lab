@@ -16,3 +16,8 @@ scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
+
+  # Per-container CPU / memory / network (the "infrastructure" view)
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]

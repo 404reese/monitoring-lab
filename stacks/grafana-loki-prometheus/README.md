@@ -34,6 +34,7 @@ Stop with `docker compose down` (add `-v` to delete stored data). Generate load 
 | FastAPI | http://localhost:8000 | 8000 |
 | Prometheus | http://localhost:9090 (targets: /targets) | 9090 |
 | Loki | http://localhost:3100/ready | 3100 |
+| cAdvisor (host metrics, no host port) | scraped by Prometheus at `cadvisor:8080` | 8080 |
 
 ## Example PromQL
 
@@ -63,3 +64,14 @@ sum by (app) (count_over_time({app=~"fastapi|nextjs"}[1m]))
 - **Dashboard empty**: generate traffic first; rates need a couple of scrapes.
 - **Changed a provisioning file**: `docker compose restart grafana`.
 - **Start from scratch**: `docker compose down -v`.
+
+## Dashboard
+
+"Monitoring Lab Overview" has sections: Overview (uptime, req/s, error %, p95, host CPU/memory gauges),
+Traffic, Process resources (CPU/RSS/FDs, Node heap and event loop, Python GC), Bandwidth (app request/response
+bytes, Docker bridge and VM uplink throughput), Docker host (cAdvisor), Prometheus health, and Logs.
+
+Note: on Docker Desktop (WSL2) cAdvisor cannot see per-container cgroups, so CPU/memory/network
+panels are host/VM-wide; per-app CPU and memory come from each app's own process metrics instead.
+If you edit the dashboard JSON, run `docker compose restart grafana` (bind mounts on Docker Desktop
+don't always trigger Grafana's file watcher).

@@ -1,0 +1,59 @@
+{
+  "uid": "monitoring-lab",
+  "title": "Monitoring Lab Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "timeseries", "title": "Request rate per app (req/s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "legendFormat": "{{job}}", "expr": "sum by (job) (rate(http_requests_total{job=~\"fastapi|nextjs\"}[1m]))" }
+      ]
+    },
+    {
+      "id": 2, "type": "timeseries", "title": "p95 latency per app",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "legendFormat": "{{job}}", "expr": "histogram_quantile(0.95, sum by (le, job) (rate(http_request_duration_seconds_bucket{job=~\"fastapi|nextjs\"}[1m])))" }
+      ]
+    },
+    {
+      "id": 3, "type": "timeseries", "title": "Error rate per app (5xx req/s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "legendFormat": "{{job}}", "expr": "sum by (job) (rate(http_requests_total{job=~\"fastapi|nextjs\", status=~\"5.*\"}[1m]))" }
+      ]
+    },
+    {
+      "id": 4, "type": "stat", "title": "Targets up",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "legendFormat": "{{job}}", "expr": "up" }
+      ]
+    },
+    {
+      "id": 5, "type": "logs", "title": "FastAPI logs",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending" },
+      "targets": [ { "refId": "A", "expr": "{app=\"fastapi\"}" } ]
+    },
+    {
+      "id": 6, "type": "logs", "title": "Next.js logs",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending" },
+      "targets": [ { "refId": "A", "expr": "{app=\"nextjs\"}" } ]
+    }
+  ]
+}
